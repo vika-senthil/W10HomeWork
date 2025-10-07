@@ -35,7 +35,7 @@
       "transform": [
         {"filter": "isFinite(datum.Latitude) && isFinite(datum.Longitude)"},
         {
-          "calculate": "isFinite(toNumber(datum.Fatalities)) && toNumber(datum.Fatalities) >= 0 ? toNumber(datum.Fatalities) : 0",
+          "calculate": "isFinite(toNumber(datum.Fatalities)) && toNumber(datum.Fatalities) > 0 ? toNumber(datum.Fatalities) : 1",
           "as": "fatalOK"
         },
         {
@@ -48,19 +48,8 @@
       "encoding": {
         "longitude": {"field": "Longitude", "type": "quantitative"},
         "latitude": {"field": "Latitude", "type": "quantitative"},
-        "size": {
-          "field": "fatalOK",
-          "type": "quantitative",
-          "title": "Fatalities",
-          "legend": {"format": "~s"},
-          "scale": {"range": [30, 800]}
-        },
-        "color": {
-          "field": "fatalOK",
-          "type": "quantitative",
-          "title": "Fatalities",
-          "scale": {"scheme": "reds"}
-        },
+        "size": {"field": "fatalOK", "type": "quantitative", "title": "Fatalities", "scale": {"range": [30, 800]}},
+        "color": {"field": "fatalOK", "type": "quantitative", "title": "Fatalities", "scale": {"scheme": "reds"}},
         "tooltip": [
           {"field": "Date", "title": "Date"},
           {"field": "Location", "title": "Location"},
@@ -71,22 +60,6 @@
           {"field": "Longitude", "title": "Lon"}
         ]
       }
-    },
-
-    {
-      "data": {
-        "values": [
-          { "Longitude": 105.0, "Latitude": 5.0,   "Label": "MH370 (2014)" },
-          { "Longitude": -16.34, "Latitude": 28.48, "Label": "Tenerife (1977)" }
-        ]
-      },
-      "mark": { "type": "text", "fontSize": 12, "fontWeight": "bold", "dx": 8, "dy": -8, "color": "black" },
-      "encoding": {
-        "longitude": {"field": "Longitude", "type": "quantitative"},
-        "latitude":  {"field": "Latitude",  "type": "quantitative"},
-        "text":      {"field": "Label"}
-      }
     }
   ]
 }
-
