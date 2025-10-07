@@ -29,41 +29,27 @@
         "url": "https://vika-senthil.github.io/W10HomeWork/WEEK%2010%20-%20Sheet1.csv",
         "format": {
           "type": "csv",
-          "parse": {
-            "Latitude": "number",
-            "Longitude": "number",
-            "Fatalities": "number"
-          }
+          "parse": { "Latitude": "number", "Longitude": "number", "Fatalities": "number" }
         }
       },
       "transform": [
         {"filter": "isFinite(datum.Latitude) && isFinite(datum.Longitude)"},
         {
-          "calculate": "isFinite(toNumber(datum.Fatalities)) && toNumber(datum.Fatalities) >= 0 ? toNumber(datum.Fatalities) : 0",
+          "calculate": "isFinite(toNumber(datum.Fatalities)) && toNumber(datum.Fatalities) > 0 ? toNumber(datum.Fatalities) : 1",
           "as": "fatalOK"
         },
         {
           "calculate": "toNumber(substring(datum.Date, length(datum.Date)-4, length(datum.Date)))",
           "as": "Year"
         },
-        {"filter": "datum.Year == yearSel"}
+        {"filter": "isFinite(datum.Year) && datum.Year == yearSel"}
       ],
       "mark": {"type": "circle", "opacity": 0.75, "stroke": "#333", "strokeWidth": 0.2},
       "encoding": {
         "longitude": {"field": "Longitude", "type": "quantitative"},
         "latitude": {"field": "Latitude", "type": "quantitative"},
-        "size": {
-          "field": "fatalOK",
-          "type": "quantitative",
-          "title": "Fatalities",
-          "scale": {"range": [30, 800]}
-        },
-        "color": {
-          "field": "fatalOK",
-          "type": "quantitative",
-          "title": "Fatalities",
-          "scale": {"scheme": "reds"}
-        },
+        "size": {"field": "fatalOK", "type": "quantitative", "title": "Fatalities", "scale": {"range": [30, 800]}},
+        "color": {"field": "fatalOK", "type": "quantitative", "title": "Fatalities", "scale": {"scheme": "reds"}},
         "tooltip": [
           {"field": "Date", "title": "Date"},
           {"field": "Location", "title": "Location"},
@@ -74,17 +60,6 @@
           {"field": "Longitude", "title": "Lon"}
         ]
       }
-    },
-
-    {
-      "data": { "values": [ { "Longitude": 105, "Latitude": 5, "Label": "MH370 (2014)" } ] },
-      "mark": {"type": "text", "fontSize": 12, "fontWeight": "bold", "dx": 10, "dy": -10, "color": "black"},
-      "encoding": {
-        "longitude": {"field": "Longitude", "type": "quantitative"},
-        "latitude": {"field": "Latitude", "type": "quantitative"},
-        "text": {"field": "Label"}
-      }
     }
   ]
 }
-
