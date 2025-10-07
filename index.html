@@ -1,24 +1,116 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Test</title>
+  <title>Global Plane Crashes (1908–2023)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 18px; background:#fafafa; }
+    h1 { margin: 0 0 6px; }
+    .caption { color:#555; margin: 0 0 18px; }
+    .viz { margin: 28px 0; }
+  </style>
 </head>
 <body>
-  <h2>Hello from GitHub Pages</h2>
-  <div id="viz"></div>
+  <h1>Global Plane Crashes (1908–2023)</h1>
+  <p class="caption">Map shows each crash; circle size & colour = fatalities. Use the slider to view a single year.</p>
+
+  <div id="map" class="viz"></div>
+  <div id="trend" class="viz"></div>
+
   <script>
-    const spec = {
+    /* 🔗 EDIT THIS if your CSV name is different */
+    const CSV_URL = "https://vika-senthil.github.io/W10HomeWork/WEEK%2010%20-%20Sheet1.csv";
+    // e.g. if you renamed: const CSV_URL = "https://vika-senthil.github.io/W10HomeWork/plane_crashes.csv";
+
+    /* === MAP SPEC === */
+    const mapSpec = {
       "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "data": {"values":[{"x":1,"y":1},{"x":2,"y":3}]},
-      "mark": "line",
-      "encoding": {"x":{"field":"x","type":"quantitative"}, "y":{"field":"y","type":"quantitative"}}
+      "width": 900,
+      "height": 480,
+      "projection": {"type": "equalEarth"},
+      "layer": [
+        { "data": {"sphere": {}},      "mark": {"type":"geoshape","fill":"#eef6ff"} },
+        { "data": {"graticule": true}, "mark": {"type":"geoshape","stroke":"#d0d7de","strokeWidth":0.4} },
+        {
+          "data": {
+            "url": "https://unpkg.com/vega-datasets@2.11.0/data/world-110m.json",
+            "format": {"type": "topojson", "feature": "countries"}
+          },
+          "mark": {"type":"geoshape","fill":"#e6e6e6","stroke":"white","strokeWidth":0.5}
+        },
+        {
+          "data": {
+            "url": CSV_URL,
+            "format": {
+              "type": "csv",
+              "parse": {"Latitude":"number","Longitude":"number","Fatalities":"number"}
+            }
+          },
+          "transform": [
+            {"filter": "isFinite(datum.Latitude) && isFinite(datum.Longitude)"},
+            {
+              "calculate": "isFinite(toNumber(datum.Fatalities)) && toNumber(datum.Fatalities) >= 0 ? toNumber(datum.Fatalities) : 0",
+              "as": "fatalOK"
+            },
+            {
+              "calculate": "toNumber(substring(datum.Date, length(datum.Date)-4, length(datum.Date)))",
+              "as": "Year"
+            },
+            {"filter": "datum.Year == yearSel"}
+          ],
+          "mark": {"type":"circle","opacity":0.75,"stroke":"#333","strokeWidth":0.2},
+          "encoding": {
+            "longitude": {"field":"Longitude","type":"quantitative"},
+            "latitude":  {"field":"Latitude","type":"quantitative"},
+            "size":  {"field":"fatalOK","type":"quantitative","title":"Fatalities","scale":{"range":[30,800]}},
+            "color": {"field":"fatalOK","type":"quantitative","title":"Fatalities","scale":{"scheme":"reds"}},
+            "tooltip": [
+              {"field":"Date","title":"Date"},
+              {"field":"Location","title":"Location"},
+              {"field":"Operator","title":"Operator"},
+              {"field":"Fatalities","title":"Fatalities (raw)"},
+              {"field":"fatalOK","title":"Fatalities (parsed)"},
+              {"field":"Latitude","title":"Lat"},
+              {"field":"Longitude","title":"Lon"}
+            ]
+          }
+        }
+      ],
+      "params": [
+        {"name":"yearSel","value":2014,"bind":{"input":"range","min":1908,"max":2023,"step":1,"name":"Year: "}}
+      ]
     };
-    vegaEmbed('#viz', spec, {actions:false});
+
+    /* === CRASHES PER YEAR (counts) === */
+    const trendSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 900,
+      "height": 240,
+      "title": "Number of Crashes per Year (all years)",
+      "data": {"url": CSV_URL, "format": {"type": "csv"}},
+      "transform": [
+        {
+          "calculate": "toNumber(substring(datum.Date, length(datum.Date)-4, length(datum.Date)))",
+          "as": "Year"
+        },
+        {"filter": "isFinite(datum.Year)"},
+        {"aggregate": [{"op":"count","as":"CrashCount"}], "groupby": ["Year"]},
+        {"sort": [{"field":"Year","order":"ascending"}]}
+      ],
+      "mark": {"type":"line","point": true},
+      "encoding": {
+        "x": {"field":"Year","type":"quantitative","title":"Year"},
+        "y": {"field":"CrashCount","type":"quantitative","title":"Crashes"},
+        "tooltip": [{"field":"Year"},{"field":"CrashCount"}]
+      }
+    };
+
+    vegaEmbed('#map', mapSpec,   {actions:false}).catch(console.error);
+    vegaEmbed('#trend', trendSpec,{actions:false}).catch(console.error);
   </script>
 </body>
 </html>
-
