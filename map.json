@@ -24,7 +24,6 @@
       "mark": {"type": "geoshape", "fill": "#e6e6e6", "stroke": "white", "strokeWidth": 0.5}
     },
 
-    /* Crash points */
     {
       "data": {
         "url": "https://vika-senthil.github.io/W10HomeWork/WEEK%2010%20-%20Sheet1.csv",
@@ -74,7 +73,6 @@
       }
     },
 
-    /* Annotations (edit or add more if you want) */
     {
       "data": {
         "values": [
